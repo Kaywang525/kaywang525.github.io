@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"></meta>
+        <title>Kay❤Rae</title>
+    </head>
+    <script src="script.js"></script>
+
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            background: url("https://www.astroarts.co.jp/photo-gallery/data/alphavir/51109_m.jpg") no-repeat center center fixed;
+                -webkit-background-size: cover;
+                -o-background-size: cover;                
+                background-size: cover;
+        }
+    </style>
+</head>
+<body>
+<canvas id="mycanvas"></canvas>
+<script>
+    window.requestAnimationFrame=(function(){
+        return window.requestAnimationFrame||
+                        window.webkitRequestAnimationFrame||
+                        window.mozRequestAnimationFrame||
+                        function (callback){
+                            window.setTimeout(callback,1000)
+                        }
+    })();
+    var area=document.getElementById("mycanvas");
+    area.width=document.documentElement.clientWidth;
+    area.height=document.documentElement.clientHeight;
+    var ctx=area.getContext("2d");
+    hue=120;
+    timerTick = 0;
+    timerTotal=5;
+    fireworks=[];
+    particles=[];
+    function random(min,max){
+        return Math.random()*(max-min)+min;
+    }
+    function distans(sx,sy,tx,ty){
+        var xdistan=sx-tx;
+        var ydistan=sy-ty;
+        return Math.sqrt((Math.pow(xdistan,2)+Math.pow(ydistan,2)));
+    }
+    function Firework(sx,sy,tx,ty){
+        this.x=sx;
+        this.y=sy;
+        this.sx=sx;
+        this.sy=sy;
+        this.tx=tx;
+        this.ty=ty;
+        this.targetDistances=distans(sx,sy,tx,ty);
+        this.distancesc=0;
+        this.guiji=[];
+        this.guijicount=3;
+        while(this.guijicount--){
+            this.guiji.push([this.x,this.y]);
+        }
+        this.angle=Math.atan2(ty-sy,tx-sx);
+        this.speed=2;
+        this.jiasudu=1.05;
+        this.brightness=random(50,70);
+        this.targetRad=5;
+    }
+    Firework.prototype.update=function(index){
+        this.guiji.pop();
+        this.guiji.push([this.x,this.y]);
+        if(this.targetRad<8){
+            this.targetRad+=0.3;
+        }else{
+            this.targetRad=1;
+        }
+        this.speed*=this.jiasudu;
+        var vx=Math.cos(this.angle)*this.speed;
+        var vy=Math.sin(this.angle)*this.speed;
+        this.distancesc=distans(this.sx,this.sy,this.x+vx,this.y+vy);
+        if(this.distancesc>=this.targetDistances){
+            createparticals(this.tx,this.ty);
+            fireworks.splice(index,1)
+        }else{
+            this.x+=vx;
+            this.y+=vy;
+        }
+    }
+ 
+    Firework.prototype.draw=function(){
+        ctx.beginPath();
+        ctx.moveTo(this.guiji[this.guiji.length-1][0],this.guiji[this.guiji.length-1][1]);
+        ctx.lineTo(this.x,this.y);
+        ctx.strokeStyle='hsl('+hue+',100%,'+this.brightness+'%)';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(this.tx,this.ty,this.targetRad,0,Math.PI*2);
+        ctx.stroke();
+    }
+    function Particle(x, y) {
+        this.x = x;
+        this.y = y;
+        this.guiji = [];
+        this.guijicount = 10;
+        while(this.guijicount--){
+            this.guiji.push([this.x,this.y]);
+        }
+        this.angle=random(0 , 2*Math.PI);
+        this.speed=random(1,10);
+        this.mocal=0.95;
+        this.gravity=0.98;
+        this.hue=random(hue-20,hue+20);
+        this.brightness=random(50,80);
+        this.alpha=1;
+        this.decay=random(0.015,0.03);
+    }
+    Particle.prototype.update=function(index){
+        this.guiji.pop();
+        this.guiji.unshift([this.x,this.y]);
+        this.speed*=this.mocal;
+        this.x+=Math.cos(this.angle)*this.speed;
+        this.y+=Math.sin(this.angle)*this.speed+this.gravity;
+        this.alpha-=this.decay;
+        if(this.alpha<=this.decay){
+            particles.splice(index,1)
+        }
+    }
+    Particle.prototype.draw=function(){
+        ctx.beginPath();
+        ctx.moveTo(this.guiji[this.guiji.length-1][0],this.guiji[this.guiji.length-1][1]);
+        ctx.lineTo(this.x,this.y);
+        ctx.strokeStyle='hsl('+hue+',100%,'+this.brightness+'%)';
+        ctx.stroke();
+    }
+    function createparticals(x,y){
+        var particalcount=500;
+        while(particalcount--){
+            particles.push(new Particle(x,y))
+        }
+    }
+    var clientw=document.documentElement.clientWidth;
+    var clienth=document.documentElement.clientHeight;
+    function loop(){
+        requestAnimationFrame(loop);
+        hue+=0.5;
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.fillRect(0,0,clientw,clienth);
+        ctx.fillStyle='rgb(0,0,0,0.5)';
+        ctx.globalCompositeOperation='lighter';
+        var i=fireworks.length;
+        while(i--){
+            fireworks[i].draw();
+            fireworks[i].update(i);
+        }
+        var i=particles.length;
+        while(i--){
+            particles[i].draw();
+            particles[i].update(i);
+        }
+        if(timerTick>=timerTotal)
+        {
+            fireworks.push(new Firework(clientw/2,clienth,random(0,clientw),random(0,clienth)));
+            timerTick=0;
+        }
+        else{
+            timerTick++;
+        }
+    }
+    window.οnlοad=loop();
+</script>
+
+  <div id="main">
+  
+    <div id="wrap">
+  
+      <div id="text">
+  
+        <div id="code"> <font color="#FFB6C1"> <span class="say">你好啊，隆园辉</span><br>
+  
+          <span class="say">很难得这么正式的称呼你， </span><br>
+  
+          <span class="say">我们已经在一起999天了， </span><br>
+  
+          <span class="say">这两年多的时间里，感谢你对我的包容和爱。 </span><br>
+  
+          <span class="say">不知道你还记不记得那些年我们说过的情话？</span><br>
+  
+          <span class="say"></span><br>
+  
+          <span class="say">你说：真的会有从未谋面，就会信任一个人，<br>心中有一个声音，指向你，<br>这种感觉很奇妙，我想枕着这份幸福，睡觉</span><br>
+  
+                  <span class="say"> </span><br>
+  
+          <span class="say">我说：我这人很多时候都过于理智了。<br>遇到你之后，我觉得，<br>如果我再这么理智下去，我可能会错过你。<br>我错过了这么多人，我都没有觉得可惜。但我不想错过你  </span><br>
+  
+                          <span class="say"> </span><br>
+  
+          <span class="say"> 你说：明阳四季，皆不及你温暖千分之一。<br>众生皆魔，唯独你是我心中的仙。</span><br>
+  
+          <span class="say"></span><br>
+  
+          <span class="say">我说：不用找我，我就在这。<br> 不同意你路过，呆着。<br>我们一起去终点吧，不用你等我。</span><br>
+
+               <span class="say"> </span><br>
+  
+                   <span class="say"> 还记得2020年3月28日的表白嘛？
+                           <span class="say"> </span><br><br>
+  
+                                   <div style="padding:50px;color:#B0C4DE;background-color:#191970; border:1px solid black;">今天其实是3月23日，<br>我猜你看到这封信的时候一定会好奇，<br>
+                                    我是什么时候为你写的，<br>所以就这样悄悄地告诉你咯。<br>
+                                    看了看，离我们相识已经快两个月了，<br>
+                                    下面，是我第二次为你写长篇小情书。<br>
+                                    对于我来说，这两个月，<br>
+                                    如痴如醉。<br>
+                                    我遇到了我喜欢的女孩，<br>
+                                    用我所希望的方式喜欢着她，<br>
+                                    每天都想对她说情话，准备小惊喜。<br>
+                                    那种朦胧暧昧的情绪从心间潺潺流出，<br>
+                                    却被旋即而来的空气温柔填满，<br>
+                                    微微发胀，<br>
+                                    顶得胸腔鼓起来，<br>
+                                    沉甸甸的坠在身体里。<br>
+                                    你对我来说，<br>
+                                    是意外，<br>
+                                    美丽的意外。<br>
+                                    明明是往枪口撞的，<br>
+                                    明明开始的我们都没有想和对方有些什么，<br>
+                                    却在这两个月中，<br>
+                                    意外成为了彼此的唯一。<br>
+                                    我为了靠近你，<br>
+                                    不顾颜面，<br>
+                                    不管身形，<br>
+                                    像极了向上生长的树枝，<br>
+                                    忘记了用枝繁叶茂去伪装自己，<br>
+                                    但如果你也同样，<br>
+                                    你便能看到，<br>
+                                    我的根扎得有多深。<br>
+                                    我知道现在不是最好的自己，<br>
+                                    但却是我这23年来最好的，<br>
+                                    有精力去爱，<br>
+                                    明白该怎么爱，<br>
+                                    明白可以给予你什么。<br>
+                                    这一切在我看来，<br>
+                                    是最好的。<br>
+                                    在你之后，<br>
+                                    或许便再也没有这样的我了，<br>
+                                    但我不会这么想，<br>
+                                    因为这个前提，<br>
+                                    我不会再去假设，<br>
+                                    我会坚定不移，<br>
+                                    那必然事情也会朝好的方面发展。<br>
+                                    两个月我们交换故事，<br>
+                                    到谈论爱情观，<br>
+                                    在磨合中，<br>
+                                    我们变得更加适合。<br>
+                                    我曾想，<br>
+                                    就算喜欢男生也不要再喜欢女生了，<br>
+                                    却在朝前跑的路途中，<br>
+                                    看到了你，<br>
+                                    你问我能不能把心给你，<br>
+                                    我便着了魔，<br>
+                                    我叫你姐姐，<br>
+                                    第一次这样称呼一位不熟的女子，<br>
+                                    你说你也是第一次要求别人这样叫。<br>
+                                    我总是习惯性的无视别人的对话框，<br>
+                                    我生性冷漠，<br>
+                                    能让我情绪波动的事情，<br>
+                                    其实很少。<br>
+                                    在万籁俱寂的夜里，<br>
+                                    听着偶尔传来的声音，<br>
+                                    将手机拿起又放下，<br>
+                                    觉得惺惺作态的自己，<br>
+                                    很无聊。<br>
+                                    放下迎合，<br>
+                                    享受寂寞。<br>
+                                    闭着眼睛，<br>
+                                    听着你给我推送的歌曲，<br>
+                                    竟然，觉得心安，<br>
+                                    突然在想，<br>
+                                    你听这些歌，<br>
+                                    会是什么情绪。<br>
+                                    有天醒来，<br>
+                                    熟悉的提示音，<br>
+                                    打开手机，<br>
+                                    居然是你。<br>
+                                    你说你给我说一件心事，<br>
+                                    我认真的解读着聊天记录，<br>
+                                    依旧像个旁观者一般理智，<br>
+                                    却因为你的主动，<br>
+                                    心慢慢为你打开了一条缝。
+                                    后来，<br>
+                                    在那个不断克制心动的夜晚，<br>
+                                    因第二天的坦白，<br>
+                                    而揭开了最后一层面纱。<br>
+                                    既然萌发了，<br>
+                                    就往下看看吧。<br>
+                                    我这样想。<br>
+                                    你给我发照片，<br>
+                                    我开始认真端详，<br>
+                                    高高的鼻梁，<br>
+                                    小小的嘴唇，<br>
+                                    大大的双眼皮和眼睛，<br>
+                                    你很好看也很耐看，<br>
+                                    足够我喜欢。<br>
+                                    看见你说话的语气，<br>
+                                    越来越“小王化”，<br>
+                                    不禁内心暗暗窃喜，<br>
+                                    或许你自己也没意识到。<br>
+                                    而我也没有意识到，<br>
+                                    仅仅是这样一条小缝隙，<br>
+                                    就让你逐渐的钻入我心，<br>
+                                    原来我如此渴望着你说，<br>
+                                    我就是你的月亮。<br>
+                                    那些看似短暂的时光，<br>
+                                    沉入幽深暗蓝的海底，<br>
+                                    在那寂寞永夜里，<br>
+                                    你是无垠深海上空，<br>
+                                    唯一的星星，<br>
+                                    唯有你的光辉能像漫过山岭的薄雾，<br>
+                                    穿透我的心。<br>
+                                    如果说记忆会像繁星般璀璨，<br>
+                                    最明亮的那颗一定是关于你。<br>
+                                    我想给你讲情话，<br>
+                                    想用这些填补我不在你身边的那份空缺，<br>
+                                    填满你的生活，<br>
+                                    我不是一个爱说情话的人，<br>
+                                    只为你，<br>
+                                    温柔、浪漫、一尘不染。<br>
+                                    想做那个被你选择的蜡烛，<br>
+                                    拥有你喜欢的温度和热情，<br>
+                                    成为那个明亮而有力量的光，点亮你。<br>
+                                    总觉得相识你太晚，<br>
+                                    若我只能活到60岁，<br>
+                                    我们还有319680个小时，<br>
+                                    若我活到70岁，<br>
+                                    我们还有406080个小时，<br>
+                                    若我们都能活到80岁，<br>
+                                    我们还有492480个小时。<br>
+                                    若我们的生命再长一些活到90岁，<br>
+                                    我们还有578880个小时。<br>
+                                    当我们变成一堆白色的粉尘，<br>
+                                    当我们变成风，<br>
+                                    我们又将面临着分别，<br>
+                                    或许我们会变成路灯下两粒相互依偎的尘埃，<br>
+                                    宇宙的粒子不会湮灭，<br>
+                                    而我们也终将又会在一起，<br>
+                                    但这三十多万乃至五十多万个小时，<br>
+                                    我一秒都不愿浪费，<br>
+                                    我想，一直一直和你在一起。<br>
+                                    你说心里说过无数遍，<br>
+                                    对我的表白，<br>
+                                    你期待的也是我所期待的。<br>
+                                    隆园辉<br>
+                                    Would you like to associate with me?<br>
+                                    난 너를 좋아해,너 나랑 사귈수 있어?<br>
+                                    我喜欢你，你可以和我交往吗？<br>
+                                    </div>
+                                
+                                </span><br>
+  
+                          <span class="say"> </span><br>
+  
+          <span class="say">这是我正式向你表白，心里真的好紧张。</span><br>
+  
+          <span class="say"> </span><br>
+          <span class="say">如今看来，那些话还是略显稚嫩了，</span><br>
+          <span class="say">但每一句，都是那时候的我最真诚的话语。 </span><br>
+          <span class="say">而今，你已经在我身边两年有余，</span><br>
+          <span class="say">我觉得我是这个世上最幸运的人了，</span><br>
+          <span class="say">谢谢你，给了我，这一辈子都值得炫耀的爱。</span><br>
+          <span class="say">有你在我身边，我很幸福。</span><br>
+          <span class="say">或许你觉得我没有以前那么会说话了，</span><br>
+          <span class="say">而我也有一种江郎才尽的感觉，</span><br>
+          <span class="say">不过，写写改改也总算是把答应你的歌写出来了。</span><br>
+          <span class="say">看看这首历时两年写出的歌吧！</span><br>
+          <div style="padding:50px;color:#B0C4DE;background-color:#191970; border:1px solid black;">
+            <span class="say"> 九世缘 </span><br>
+          <span class="say">听说有极光抚上海平面</span><br>
+          <span class="say">曾有多少陈辞铺在心间 </span><br>
+          <span class="say">那日迷蒙细雨</span><br>
+          <span class="say">你的窗前浮笔芊芊</span><br>
+          <span class="say">伞落西风席卷过此篇</span><br>
+          <span class="say"></span><br>
+          <span class="say">盼深情几分轮回百转</span><br>
+          <span class="say">弹一曲箜篌扰乱繁华三千</span><br>
+          <span class="say">可曾踏歌伴君此共缠绵</span><br>
+          <span class="say">唯有此情不负九世缘</span><br>
+          <span class="say"></span><br>
+          <span class="say">任凭素装轻裹夜雨不言</span><br>
+          <span class="say">奈何良辰只此墨染尘烟</span><br>
+          <span class="say">若是点燃烽烟只为红颜</span><br>
+          <span class="say">愿成为那星火燎了这世间</span><br>
+          <span class="say"></span><br>
+          <span class="say">而今漫天星光开满群山</span><br>
+          <span class="say">是你在我眼前布满霞天</span><br>
+          <span class="say">我闻云中风铃</span><br>
+          <span class="say">挂上月色此情绵绵</span><br>
+          <span class="say">唯有薄暮缠绕在指尖</span><br>
+          <span class="say"></span><br>
+          <span class="say">叹相思几度缱绻妄念</span><br>
+          <span class="say">吹一曲浅笛划破涓涓湖畔</span><br>
+          <span class="say">可曾惊动繁星如梦难眠</span><br>
+          <span class="say">愿在来世能了九世缘</span><br>
+          </div>
+          <span class="say">我爱你，在一起999天快乐~</span><br>
+       </font>
+  
+
+        </div>
+  
+  
+    </div>
+  
+  </div>
+</body>
+</html>
